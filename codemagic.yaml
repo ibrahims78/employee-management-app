@@ -1,27 +1,31 @@
 workflows:
   replit-to-apk:
-    name: Replit Mobile Build
+    name: Replit Mobile Build Final
     working_directory: mobile 
     instance_type: mac_mini_m1
-    max_build_duration: 60
     environment:
       flutter: stable
       vars:
         JAVA_HOME: /Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
     scripts:
-      - name: Reconstruct Android Files
+      - name: Reconstruct and Patch Permissions
         script: |
-          # حذف مجلد أندرويد القديم الخاص بـ Replit (لأنه يسبب المشكلة)
+          # 1. إعادة إنشاء ملفات الأندرويد
           rm -rf android
-          
-          # إجبار Flutter على إعادة إنشاء مجلد أندرويد حديث ونظيف تماماً
           flutter create . --platforms=android
           
-          # تثبيت المكتبات
+          # 2. أمر سحري لإضافة تصريح الإنترنت تلقائياً داخل الملف المفقود
+          sed -i '' '/<application/i\
+          <uses-permission android:name="android.permission.INTERNET" />\
+          <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />' android/app/src/main/AndroidManifest.xml
+          
+          # 3. السماح بالاتصال بالسيرفرات (Cleartext Traffic)
+          sed -i '' 's/<application/<application android:usesCleartextTraffic="true"/' android/app/src/main/AndroidManifest.xml
+          
+          # 4. تثبيت المكتبات
           flutter pub get
       - name: Build APK
         script: |
-          # البناء الآن سيتم باستخدام ملفات الأندرويد الجديدة
           flutter build apk --release --no-tree-shake-icons
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
