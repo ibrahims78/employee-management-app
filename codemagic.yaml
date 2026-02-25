@@ -1,29 +1,29 @@
 workflows:
   android-apk-workflow:
     name: Android Mobile Build (Fixed)
-    # الدخول للمجلد الصحيح
     working_directory: mobile 
     instance_type: mac_mini_m1
     max_build_duration: 60
     environment:
       flutter: stable
-      # إضافة إصدار Java متوافق مع Gradle الحديث
-      groups:
-        - java_version: 17
+      vars:
+        # هنا قمنا بتحديد إصدار الجافا بشكل صحيح كمتغير بيئة
+        JAVA_VERSION: "17"
     scripts:
+      - name: Set up Java
+        script: |
+          # التأكد من استخدام إصدار جافا الصحيح المتوافق مع Gradle الحديث
+          sdk use java 17.0.7-term
       - name: Clean and Get dependencies
         script: |
-          # تنظيف شامل للمشروع والمجلدات المؤقتة
           flutter clean
           flutter pub get
       - name: Fix and Build Android APK
         script: |
-          # الدخول لمجلد أندرويد لتنظيف Gradle داخلياً
           cd android
           chmod +x gradlew
           ./gradlew clean
           cd ..
-          # بناء APK مع تجاوز أخطاء الأيقونات والتحقق من الإصدار
           flutter build apk --release --no-tree-shake-icons
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
