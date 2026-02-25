@@ -5,12 +5,14 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class ApiClient {
   final Dio dio = Dio();
   final FlutterSecureStorage storage = const FlutterSecureStorage();
-  final String baseUrl = "http://localhost:5000/api"; // Default for local testing
+  
+  // تم تحديث الرابط هنا ليتصل بسيرفر Replit الخاص بك مباشرة
+  final String baseUrl = "https://397bbcdb-aae3-44be-b272-2c82dd1aede6-00-3egxf2q4057ga.riker.replit.dev/api";
 
   ApiClient() {
     dio.options.baseUrl = baseUrl;
-    dio.options.connectTimeout = const Duration(seconds: 5);
-    dio.options.receiveTimeout = const Duration(seconds: 3);
+    dio.options.connectTimeout = const Duration(seconds: 15); // زيادة وقت الانتظار قليلاً لتناسب سرعة السيرفرات السحابية
+    dio.options.receiveTimeout = const Duration(seconds: 13);
 
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
@@ -34,7 +36,6 @@ class ApiClient {
         if (e.response?.statusCode == 401) {
           debugPrint('Unauthorized - Clearing Token');
           await storage.delete(key: 'jwt_token');
-          // Navigation handling would typically be done via a global key or listener
         }
         return handler.next(e);
       },
@@ -43,8 +44,8 @@ class ApiClient {
 
   Future<Response> login(String username, String password) async {
     print('--- FLUTTER LOGIN REQUEST ---');
-    print('Endpoint: /api/mobile/login');
-    print('Payload: {username: $username, password: ***}');
+    print('Endpoint: /mobile/login');
+    // ملاحظة: الرابط النهائي سيكون baseUrl + /mobile/login
     return await dio.post('/mobile/login', data: {
       'username': username,
       'password': password,
