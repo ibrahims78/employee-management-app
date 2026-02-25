@@ -1,27 +1,27 @@
 workflows:
-  android-apk-workflow:
-    name: Android Mobile Build (Compatibility Mode)
-    # الدخول التلقائي لمجلد المشروع
+  replit-to-apk:
+    name: Replit Mobile Build
     working_directory: mobile 
     instance_type: mac_mini_m1
     max_build_duration: 60
     environment:
-      # نستخدم إصدار 3.19.6 بدلاً من stable لتجنب تعارض Gradle
-      flutter: 3.19.6
+      flutter: stable
       vars:
         JAVA_HOME: /Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
     scripts:
-      - name: Prepare and Build
+      - name: Reconstruct Android Files
         script: |
-          # تنظيف أي ملفات بناء قديمة
-          flutter clean
+          # حذف مجلد أندرويد القديم الخاص بـ Replit (لأنه يسبب المشكلة)
+          rm -rf android
           
-          # تحميل المكتبات (Dependencies)
+          # إجبار Flutter على إعادة إنشاء مجلد أندرويد حديث ونظيف تماماً
+          flutter create . --platforms=android
+          
+          # تثبيت المكتبات
           flutter pub get
-          
-          # بناء ملف APK
-          # أضفنا --no-tree-shake-icons لتجنب فشل بناء الأيقونات في الإصدارات القديمة
+      - name: Build APK
+        script: |
+          # البناء الآن سيتم باستخدام ملفات الأندرويد الجديدة
           flutter build apk --release --no-tree-shake-icons
     artifacts:
-      # المسار الذي سيجد فيه Codemagic الملف لتحميله
       - build/app/outputs/flutter-apk/app-release.apk
