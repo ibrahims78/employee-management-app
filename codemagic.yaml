@@ -1,25 +1,32 @@
 workflows:
   android-apk-workflow:
-    name: Android Mobile Build (Fixed)
-    working_directory: mobile 
+    name: Android Mobile Build (Manual Path)
+    # أزلنا working_directory لنبدأ من الجذر الرئيسي
     instance_type: mac_mini_m1
     max_build_duration: 60
     environment:
       flutter: stable
       vars:
-        # تحديد إصدار الجافا عبر المسار المباشر في Codemagic
         JAVA_HOME: /Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
     scripts:
-      - name: Clean and Get dependencies
+      - name: Inspect and Build
         script: |
+          # 1. عرض المجلدات الموجودة للتأكد من الاسم
+          echo "Checking directories..."
+          ls -d */
+          
+          # 2. الدخول للمجلد (تأكد أن الاسم mobile مطابق تماماً لما تراه في GitHub)
+          cd mobile
+          
+          # 3. عرض الملفات للتأكد من وجود pubspec.yaml
+          echo "Checking files inside mobile..."
+          ls
+          
+          # 4. التنظيف وتثبيت المكتبات
           flutter clean
           flutter pub get
-      - name: Fix and Build Android APK
-        script: |
-          cd android
-          chmod +x gradlew
-          ./gradlew clean
-          cd ..
+          
+          # 5. بناء التطبيق
           flutter build apk --release --no-tree-shake-icons
     artifacts:
-      - build/app/outputs/flutter-apk/app-release.apk
+      - mobile/build/app/outputs/flutter-apk/app-release.apk
