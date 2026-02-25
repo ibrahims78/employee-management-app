@@ -7,13 +7,9 @@ workflows:
     environment:
       flutter: stable
       vars:
-        # هنا قمنا بتحديد إصدار الجافا بشكل صحيح كمتغير بيئة
-        JAVA_VERSION: "17"
+        # تحديد إصدار الجافا عبر المسار المباشر في Codemagic
+        JAVA_HOME: /Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
     scripts:
-      - name: Set up Java
-        script: |
-          # التأكد من استخدام إصدار جافا الصحيح المتوافق مع Gradle الحديث
-          sdk use java 17.0.7-term
       - name: Clean and Get dependencies
         script: |
           flutter clean
